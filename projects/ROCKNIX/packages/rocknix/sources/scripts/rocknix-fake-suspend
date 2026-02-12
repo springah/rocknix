@@ -219,6 +219,12 @@ do_resume_actions() {
   unblock_input
 }
 
+save_game_state() {
+  ${DEBUG} && log $0 "Sending SAVE_STATE to RetroArch"
+  echo -n "SAVE_STATE" | nc -u -w1 127.0.0.1 55355
+  sleep 2
+}
+
 do_shutdown() {
   # Check if HDMI has been connected while suspended
   check_hdmi_connected
@@ -246,6 +252,8 @@ do_shutdown() {
   local RUNNING_GAME=$?
 
   if [[ $RUNNING_GAME -eq 0 ]]; then
+    # Save game state before shutting down
+    save_game_state
     # ES shutdown API won't work if a game is running
     ${DEBUG} && log $0 "Shutting down now"
     shutdown now

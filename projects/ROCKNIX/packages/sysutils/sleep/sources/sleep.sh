@@ -83,6 +83,11 @@ quirks() {
 
 case $1 in
   pre)
+    # Save RetroArch game state before sleeping
+    log $0 "Sending SAVE_STATE to RetroArch"
+    echo -n "SAVE_STATE" | nc -u -w1 127.0.0.1 55355
+    sleep 2
+
     if [ "$(get_setting wifi.enabled)" == "1" ]; then
       log $0 "Disabling WIFI."
       nohup wifictl disable >${EVENTLOG} 2>&1
