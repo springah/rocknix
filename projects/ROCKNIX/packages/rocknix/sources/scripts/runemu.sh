@@ -306,6 +306,16 @@ case ${EMULATOR} in
   ;;
 esac
 
+### Write current game info for resume-on-boot feature
+if [ "${EMULATOR}" = "retroarch" ]; then
+  cat <<EOF > /tmp/.current_game
+RESUME_ROM="${ROMNAME}"
+RESUME_PLATFORM="${PLATFORM}"
+RESUME_CORE="${CORE}"
+RESUME_EMULATOR="${EMULATOR}"
+EOF
+fi
+
 ### Execution time.
 clear_screen
 ${VERBOSE} && log $0 "executing game: ${ROMNAME}"
@@ -399,6 +409,10 @@ else
         eval ${RUNTHIS} &>>${OUTPUT_LOG}
         ret_error=$?
 fi
+
+### Clean up current game breadcrumb (normal exit = no resume needed)
+rm -f /tmp/.current_game
+rm -f /storage/.config/resume_game
 
 ### Switch back to performance mode to clean up
 performance

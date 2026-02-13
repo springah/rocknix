@@ -88,6 +88,12 @@ case $1 in
     echo -n "SAVE_STATE" | nc -u -w1 127.0.0.1 55355
     sleep 2
 
+    # Persist current game info for resume-on-boot (in case battery dies during sleep)
+    if [ -f /tmp/.current_game ]; then
+      log $0 "Saving resume game info"
+      cp /tmp/.current_game /storage/.config/resume_game
+    fi
+
     if [ "$(get_setting wifi.enabled)" == "1" ]; then
       log $0 "Disabling WIFI."
       nohup wifictl disable >${EVENTLOG} 2>&1
@@ -102,6 +108,9 @@ case $1 in
     touch /run/.last_sleep_time
     ;;
   post)
+    # Woke up successfully - RetroArch is still running, no resume needed
+    rm -f /storage/.config/resume_game
+
     ledcontrol
     modules start
     powerstate start
